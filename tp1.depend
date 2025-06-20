@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1750459799 source:c:\users\otcti\downloads\trabalhooac\tp1\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+

@@ -1,0 +1,25 @@
+
+# Nome do compilador
+CC = gcc
+
+# Flags de compilação
+CFLAGS = -Wall -Wextra -std=c99
+
+# Nome do executável
+TARGET = montador
+
+# Nome do arquivo fonte
+SRC = montador.c
+
+# Regras
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+
+# Limpa arquivos gerados
+clean:
+	rm -f $(TARGET)
+
+# Limpa e recompila
+rebuild: clean all
