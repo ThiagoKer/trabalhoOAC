@@ -4,13 +4,13 @@
 
 #define MAX_LINE 100
 
-// Converte registrador "x0".."x31" para seu n�mero inteiro
+// Converte registrador "x0".."x31" para seu número inteiro
 int reg_to_int(const char *reg) {
     if (reg[0] == 'x') return atoi(&reg[1]);
     return -1;
 }
 
-// Converte n�mero para string bin�ria de tamanho fixo
+// Converte número para string binária de tamanho fixo
 void int_to_bin(unsigned int val, int bits, char *out) {
     for (int i = bits - 1; i >= 0; i--)
         out[bits - 1 - i] = (val & (1 << i)) ? '1' : '0';
@@ -24,6 +24,7 @@ void to_binary(char *line, FILE *out) {
     char bin[33];
     bin[32] = '\0';
 
+    //Função de addd
     if (sscanf(line, "add %[^,], %[^,], %s", rd, rs1, rs2) == 3) {
         int_to_bin(0b0000000, 7, bin);
         int_to_bin(reg_to_int(rs2), 5, bin + 7);
@@ -32,7 +33,9 @@ void to_binary(char *line, FILE *out) {
         int_to_bin(reg_to_int(rd), 5, bin + 20);
         int_to_bin(0b0110011, 7, bin + 25);
         fprintf(out, "%s\n", bin);
-    } else if (sscanf(line, "xor %[^,], %[^,], %s", rd, rs1, rs2) == 3) {
+    } 
+    //Comando xor
+    else if (sscanf(line, "xor %[^,], %[^,], %s", rd, rs1, rs2) == 3) {
         int_to_bin(0b0000000, 7, bin);
         int_to_bin(reg_to_int(rs2), 5, bin + 7);
         int_to_bin(reg_to_int(rs1), 5, bin + 12);
@@ -40,14 +43,18 @@ void to_binary(char *line, FILE *out) {
         int_to_bin(reg_to_int(rd), 5, bin + 20);
         int_to_bin(0b0110011, 7, bin + 25);
         fprintf(out, "%s\n", bin);
-    } else if (sscanf(line, "addi %[^,], %[^,], %d", rd, rs1, &imm) == 3) {
+       } 
+       //Função addi
+       else if (sscanf(line, "addi %[^,], %[^,], %d", rd, rs1, &imm) == 3) {
         int_to_bin(imm & 0xFFF, 12, bin);
         int_to_bin(reg_to_int(rs1), 5, bin + 12);
         int_to_bin(0b000, 3, bin + 17);
         int_to_bin(reg_to_int(rd), 5, bin + 20);
         int_to_bin(0b0010011, 7, bin + 25);
         fprintf(out, "%s\n", bin);
-    } else if (sscanf(line, "sll %[^,], %[^,], %s", rd, rs1, rs2) == 3) {
+    } 
+    //Função Shift Left Logical
+    else if (sscanf(line, "sll %[^,], %[^,], %s", rd, rs1, rs2) == 3) {
         int_to_bin(0b0000000, 7, bin);
         int_to_bin(reg_to_int(rs2), 5, bin + 7);
         int_to_bin(reg_to_int(rs1), 5, bin + 12);
@@ -55,14 +62,18 @@ void to_binary(char *line, FILE *out) {
         int_to_bin(reg_to_int(rd), 5, bin + 20);
         int_to_bin(0b0110011, 7, bin + 25);
         fprintf(out, "%s\n", bin);
-    } else if (sscanf(line, "lw %[^,], %d(%[^)])", rd, &imm, rs1) == 3) {
+    } 
+    //Função load store
+    else if (sscanf(line, "lw %[^,], %d(%[^)])", rd, &imm, rs1) == 3) {
         int_to_bin(imm & 0xFFF, 12, bin);
         int_to_bin(reg_to_int(rs1), 5, bin + 12);
         int_to_bin(0b010, 3, bin + 17);
         int_to_bin(reg_to_int(rd), 5, bin + 20);
         int_to_bin(0b0000011, 7, bin + 25);
         fprintf(out, "%s\n", bin);
-    } else if (sscanf(line, "sw %[^,], %d(%[^)])", rs2, &imm, rs1) == 3) {
+    }
+    //Função Word Store
+    else if (sscanf(line, "sw %[^,], %d(%[^)])", rs2, &imm, rs1) == 3) {
         int imm11_5 = (imm >> 5) & 0x7F;
         int imm4_0 = imm & 0x1F;
         int_to_bin(imm11_5, 7, bin);
@@ -72,7 +83,9 @@ void to_binary(char *line, FILE *out) {
         int_to_bin(imm4_0, 5, bin + 20);
         int_to_bin(0b0100011, 7, bin + 25);
         fprintf(out, "%s\n", bin);
-    } else if (sscanf(line, "bne %[^,], %[^,], %d", rs1, rs2, &imm) == 3) {
+    } 
+    //Função Desvio Condicional
+    else if (sscanf(line, "bne %[^,], %[^,], %d", rs1, rs2, &imm) == 3) {
         char b[33] = {0};
 
         int imm12 = (imm >> 12) & 0x1;
@@ -97,32 +110,33 @@ void to_binary(char *line, FILE *out) {
 }
 
 int main(int argc, char *argv[]) {
+    //Verifica se tem dois argumentos pelo menos
     if (argc < 2) {
         printf("Uso: %s entrada.asm [-o saida.txt]\n", argv[0]);
         return 1;
     }
-
+    //Abre o arquivo de entrada
     FILE *in = fopen(argv[1], "r");
     if (!in) {
         perror("Erro ao abrir o arquivo de entrada");
         return 1;
     }
-
+    // O programa verifica se foi fornecido o argumento -o
     FILE *out = stdout;
     if (argc == 4 && strcmp(argv[2], "-o") == 0) {
         out = fopen(argv[3], "w");
         if (!out) {
-            perror("Erro ao abrir arquivo de sa�da");
+            perror("Erro ao abrir arquivo de saída");
             fclose(in);
             return 1;
         }
     }
-
+    // lê cada linha do arquivo de entrada
     char line[MAX_LINE];
     while (fgets(line, sizeof(line), in)) {
         to_binary(line, out);
     }
-
+    //Fecha o arquivo
     fclose(in);
     if (out != stdout) fclose(out);
 
